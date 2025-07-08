@@ -642,6 +642,38 @@
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: var(--white);
     }
+
+    /* Footer */
+    footer {
+      background-color: var(--text-dark);
+      color: var(--white);
+      padding: 20px 0;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 10px;
+    }
+    
+    .footer-links a {
+      color: #bdc1c6;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-links a:hover {
+      color: var(--white);
+    }
     
     /* Suggestions Dropdown */
     .suggestions-dropdown {
@@ -1361,7 +1393,11 @@
       </div>
     </div>
   </div>
-  
+
+  <footer class="footer">
+    <p>&copy; 2025 Junigadi Vehicle Solution Pvt.Ltd. All rights reserved.</p>
+  </footer>
+
   <script>
      // Brand data from your image
     const vehicleBrands = {
