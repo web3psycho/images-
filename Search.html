@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Search System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #0d47a1;
+      --secondary: #f5f8fa;
+      --text-dark: #202124;
+      --text-light: #5f6368;
+      --border: #dadce0;
+      --white: #ffffff;
+      --success: #34a853;
+      --warning: #f9ab00;
+      --danger: #ea4335;
+      --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      --shadow-hover: 0 14px 28px rgba(0,0,0,0.12), 0 10px 10px rgba(0,0,0,0.10);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #f8f9fa;
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    
+    /* Header Styles */
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--white);
+      padding: 15px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .logo-icon {
+      font-size: 28px;
+    }
+    
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .logo-text h1 {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    
+    .logo-text p {
+      font-size: 14px;
+      opacity: 0.9;
+      letter-spacing: 0.3px;
+    }
+    
+    .user-actions {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background-color: var(--white);
+      color: var(--primary);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.5);
+      color: var(--white);
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+    
+    /* Main Content */
+    .main-content {
+      padding: 30px 0;
+      min-height: calc(100vh - 170px);
+    }
+    
+    .card {
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    /* Enhanced Progress Bar CSS */
+    .progress-container {
+      padding: 30px 40px;
+      background: linear-gradient(135deg, #f8faff 0%, #e3f2fd 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .progress-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .progress-line {
+      position: absolute;
+      top: 33%;
+      left: 15%;
+      right: 15%;
+      height: 4px;
+      background-color: white;
+      transform: translateY(-50%);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-line-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3359b0, #0f77d2);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .progress-line-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 6px;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgb(246, 246, 246));
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      z-index: 2;
+    }
+
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+
+    .step-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: rgb(246, 246, 246);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      color: #5f6368;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      margin-bottom: 12px;
+      border: 3px solid transparent;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .step-circle.active {
+      background-color: var(--primary);
+      color: white;
+      transform: scale(1.15);
+      box-shadow: 0 4px 20px rgba(26, 115, 232, 0.4);
+      border-color: rgb(255, 255, 255);
+    }
+
+    .step-circle.active::before {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      right: -6px;
+      bottom: -6px;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.1); opacity: 0.1; }
+      100% { transform: scale(1); opacity: 0.3; }
+    }
+
+    .step-circle.completed {
+      background-color: #0066ff;
+      color: white;
+      transform: scale(1.05);
+      box-shadow: 0 3px 12px rgba(0, 191, 255, 0.3);
+    }
+
+    .step-circle.completed::after {
+      /* content: '✓'; */
+      font-size: 20px;
+      font-weight: 900;
+      animation: checkmark 0.6s ease-in-out;
+    }
+
+    @keyframes checkmark {
+      0% { transform: scale(0) rotate(-45deg); }
+      50% { transform: scale(1.2) rotate(-45deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .step-label {
+      font-size: 14px;
+      color: #5f6368;
+      font-weight: 500;
+      text-align: center;
+      transition: all 0.4s ease;
+      max-width: 120px;
+      line-height: 1.3;
+    }
+
+    .step-item.active .step-label {
+      color: var(--primary);
+      font-weight: 700;
+      transform: translateY(-2px);
+    }
+
+    .step-item.completed .step-label {
+      color: #007be7;
+      font-weight: 600;
+    }
+
+    /* Progress percentage indicator */
+    .progress-info {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 13px;
+      color: #5f6368;
+      font-weight: 500;
+    }
+
+    .progress-info.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 600px) {
+      .progress-container {
+        padding: 20px 15px;
+      }
+
+      .progress-line {
+        position: absolute;
+        top: 33%;
+        left: 90px;
+        right: 90px;
+        height: 4px;
+        background-color: #e8eaed;
+        transform: translateY(-50%);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      
+      .progress-line {
+        left: 30px;
+        right: 30px;
+      }
+      
+      .step-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+      }
+      
+      .step-label {
+        font-size: 12px;
+        max-width: 80px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .step-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 13px;
+      }
+      
+      .step-label {
+        font-size: 11px;
+        max-width: 70px;
+      }
+      
+      .progress-line {
+        left: 25px;
+        right: 25px;
+        height: 3px;
+      }
+    }
+   
+    /* Vehicle Selection */
+    .vehicle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 2fr));
+      gap: 15px;
+    }
+    
+    .vehicle-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .vehicle-card:hover {
+      transform: scale(1.02);
+      border-color: var(--primary);
+    }
+    
+    .vehicle-card.selected {
+      border-color: var(--primary);
+      background-color: #e8f0fe;
+      box-shadow: 0 4px 8px rgba(26, 115, 232, 0.15);
+    }
+    
+    .vehicle-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+    .vehicle-icon img {
+      font-size: 40px;
+
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+    }
+    
+    .vehicle-name {
+      font-weight: 500;
+      font-size: 1rem;
+      margin-bottom: 5px;
+    }
+    
+    .vehicle-count {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+    
+    /* Price Range */
+    .price-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 15px;
+    }
+    
+    .price-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .price-card:hover {
+      border-color: var(--primary);
+    }
+    
+    .price-card.selected {
+      border-color: var(--primary);
+      background-color: #e8f0fe;
+    }
+    .price-card img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+    
+    .price-title {
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+    
+    .price-range {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 10px;
+    }
+    
+    .price-count {
+      font-size: 12px;
+      color: var(--text-light);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .serchDiv {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    /* Location Search */
+    .location-search {
+      position: relative;
+      align-items: center;
+      width: 100%;
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 12px 20px 12px 45px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+      outline: none;
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+    }
+    
+    .popular-locations {
+      margin-top: 25px;
+    }
+    
+    .section-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 15px;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Enhanced Location Grid */
+    .locations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 15px;
+    }
+
+    .location-card {
+      border-radius: 12px;
+      padding: 0;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    /* Enhanced hover effect */
+    .location-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      border-color: var(--primary);
+    }
+
+    /* Enhanced selected effect */
+    .location-card.selected {
+      border: 2px solid var(--primary);
+      box-shadow: 0 8px 25px rgba(26, 115, 232, 0.3);
+      transform: translateY(-5px);
+    }
+
+    .location-icon {
+      width: 100%;
+      height: 90px;
+      border-radius: 8px 8px 0 0;
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+
+    .location-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .vehicle-name {
+      font-weight: 500;
+      color: #333;
+      font-size: 14px;
+      padding: 10px 5px;
+      border-radius: 0 0 8px 8px;
+    }
+
+    /* Hover effect with blue overlay and tick mark */
+    .location-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 90px;
+      background: rgba(26, 115, 232, 0.7);
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .tick-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .location-card:hover .location-overlay {
+      opacity: 1;
+    }
+
+    .location-card.selected .location-overlay {
+      opacity: 1;
+      background: rgba(26, 115, 232, 0.7); /* Green for selected state */
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      padding: 20px;
+      gap: 20px; /* Added gap between buttons */
+    }
+    
+    .btn-lg {
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 8px;
+    }
+    
+    .btn-back {
+      background-color: #f1f3f4;
+      color: var(--text-dark);
+    }
+
+    .search-button{
+      width: 25%;
+      max-width: 150px;
+      display: flex;
+      height: 45px;
+    }
+    
+    .btn-search {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--white);
+    }
+    
+    /* Footer */
+    footer {
+      background-color: var(--text-dark);
+      color: var(--white);
+      padding: 20px 0;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 10px;
+    }
+    
+    .footer-links a {
+      color: #bdc1c6;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-links a:hover {
+      color: var(--white);
+    }
+    
+    /* Suggestions Dropdown */
+    .suggestions-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: var(--shadow);
+      margin-top: 5px;
+    }
+
+    .suggestion-item {
+      padding: 10px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .suggestion-item:hover {
+      background-color: #f1f3f4;
+    }
+
+    .suggestion-item i {
+      color: var(--primary);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .search-button{
+        max-width: 25%;
+      }
+      .header-container {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .logo {
+        align-self: flex-start;
+      }
+      
+      .user-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .vehicle-grid,
+      .price-grid {
+        grid-template-columns: repeat(3, 3fr);
+      }
+
+      /* Mobile horizontal scroll for locations */
+      .locations-grid {
+        display: flex;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding: 15px 0 20px;
+        gap: 15px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary) #f1f1f1;
+      }
+      
+      .locations-grid::-webkit-scrollbar {
+        height: 6px;
+      }
+      
+      .locations-grid::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      
+      .locations-grid::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 10px;
+      }
+      
+      .location-card {
+        flex: 0 0 140px;
+      }
+      
+      .action-buttons {
+        gap: 10px;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .vehicle-grid,
+      .price-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .progress-line {
+        left: 70px;
+        right: 70px;
+        height: 3px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .search-button{
+        width: 25%;
+      }
+
+      .progress-line {
+        left: 70px;
+        right: 70px;
+        height: 3px;
+      }
+
+     
+      .price-grid {
+        grid-template-columns: 1fr;
+      }
+
+      /* Vehicle Selection */
+    .vehicle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 2fr));
+      gap: 15px;
+    }
+      
+      .card-header, .card-body {
+        padding: 15px;
+      }
+    }
+
+    .highlights {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 2rem;
+      margin-top: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .highlights-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .highlight-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #f7fafc;
+      border-radius: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    .highlight-item:hover {
+      transform: translateX(4px);
+    }
+
+    .highlight-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .highlight-icon {
+      width: 40px;
+      height: 40px;
+      background: #1a73e8;
+      border-radius: 10%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .highlight-content h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 0.25rem;
+    }
+
+    .highlight-content p {
+      color: #718096;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 2rem 1rem 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.8rem;
+      margin-top: auto;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .step-content {
+      animation: fadeIn 0.4s ease-out;
+    }
+    
+    .hidden {
+      display: none;
+    }
+
+    .headLoc {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    /* Desktop grid for locations */
+    @media (min-width: 769px) {
+      .locations-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+      }
+    }
+
+    @media (min-width: 992px) {
+      .locations-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    /* Desktop hover effect */
+    @media (min-width: 769px) {
+      .location-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    /* Desktop selected effect */
+    @media (min-width: 769px) {
+      .location-card.selected {
+        transform: scale(1.03);
+        box-shadow: 0 12px 30px rgba(26, 115, 232, 0.3);
+      }
+    }
+    
+    /* Animation for deselection */
+    .location-card.deselected {
+      animation: deselection 0.5s ease;
+    }
+    
+    @keyframes deselection {
+      0% { border-color: var(--primary); }
+      100% { border-color: rgba(0, 0, 0, 0.1); }
+    }
+
+    /* Welcome back message */
+    .welcome-back {
+      background-color: #e8f0fe;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .welcome-back i {
+      color: var(--primary);
+      font-size: 24px;
+    }
+
+    .welcome-back p {
+      margin: 0;
+      font-weight: 500;
+      color: var(--text-dark);
+    }
+
+    .welcome-back .location {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .brand-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .brand-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+    
+    .brand-card:hover {
+      transform: scale(1.02);
+      border-color: var(--primary);
+    }
+    
+    .brand-card.selected {
+      border-color: var(--primary);
+      background-color: #e8f0fe;
+      box-shadow: 0 4px 8px rgba(26, 115, 232, 0.15);
+    }
+    
+    .brand-name {
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      word-break: break-word;
+    }
+    
+    /* Update progress bar for 4 steps */
+    .progress-line {
+      left: 10% !important;
+      right: 10% !important;
+    }
+    
+    @media (max-width: 600px) {
+      .progress-line {
+        left: 70px !important;
+        right: 70px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="container header-container">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-car"></i>
+        </div>
+        <div class="logo-text">
+          <h1>Easy Search</h1>
+          <p>Vehicle Search System</p>
+        </div>
+      </div>
+      <div class="user-actions">
+        <button class="btn btn-outline" id="resetBtn">
+          <i class="fas fa-sync-alt"></i> Reset
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container">
+      <div class="card">
+        <div class="progress-container">
+          <div class="progress-wrapper">
+            <div class="progress-line">
+              <div class="progress-line-fill" id="progressLineFill"></div>
+            </div>
+            <!-- Updated progress steps for 4 steps -->
+            <div class="progress-steps">
+              <div class="step-item" data-step="1">
+                <div class="step-circle">1</div>
+                <div class="step-label">Vehicle Type</div>
+              </div>
+              <div class="step-item" data-step="2">
+                <div class="step-circle">2</div>
+                <div class="step-label">Brand<br>(optional)</div>
+              </div>
+              <div class="step-item" data-step="3">
+                <div class="step-circle">3</div>
+                <div class="step-label">Price Range</div>
+              </div>
+              <div class="step-item" data-step="4">
+                <div class="step-circle">4</div>
+                <div class="step-label">Location<br>(optional)</div>
+              </div>
+            </div>
+          </div>
+          <div class="progress-info" id="progressInfo">Step 1 of 4 - Select Vehicle Type</div>
+        </div>
+        
+        <!-- Welcome back message -->
+        <div id="welcomeBack" class="hidden">
+          <div class="welcome-back">
+            <i class="fas fa-map-marker-alt"></i>
+            <p>Welcome back! You were last searching in <span class="location" id="lastLocation"></span></p>
+          </div>
+        </div>
+        <div id="welcomeBackVehicle" class="hidden">
+          <div class="welcome-back">
+            <i class="fas fa-car"></i>
+            <p>Welcome back! You were last searching for <span class="location" id="lastType"></span></p>
+          </div>
+        </div>
+        
+        <!-- Vehicle Type Selection -->
+        <div id="vehicleType" class="step-content">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fas fa-car"></i> Type of Vehicle
+            </h2>
+            <div class="action-buttons">
+              <button class="btn btn-lg btn-search" id="nextStep1">
+                Next <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="vehicle-grid">
+
+              <div class="vehicle-card" data-type="CAR">
+                <div class="vehicle-icon">
+                  <img src="./Car.svg" alt="">
+                </div>
+                <div class="vehicle-name">Cars</div>
+              </div>
+              
+              <div class="vehicle-card" data-type="LOADING">
+                <div class="vehicle-icon">
+                 <img src="./Loading.svg" alt="">
+                </div>
+                <div class="vehicle-name">Pickups & Loading</div>
+              </div>
+              
+              <div class="vehicle-card" data-type="TRUCK">
+                <div class="vehicle-icon">
+                  <img src="./Truck.svg" alt="">
+                </div>
+                <div class="vehicle-name">Trucks & Trailers</div>
+              </div>
+              
+              <div class="vehicle-card" data-type="TAXI">
+                <div class="vehicle-icon">
+                  <img src="./taxi.svg" alt="">
+                </div>
+                <div class="vehicle-name">Taxi</div>
+              </div>
+              
+              <div class="vehicle-card" data-type="TRACTOR">
+                <div class="vehicle-icon">
+                  <img src="./tractor.svg" alt="">
+                </div>
+                <div class="vehicle-name">Tractor & Equipments</div>
+              </div>
+              
+              <div class="vehicle-card" data-type="JCB">
+                <div class="vehicle-icon">
+                  <img src="./JCB.svg" alt="">
+                </div>
+                <div class="vehicle-name">JCB & Machinery</div>
+              </div>
+              
+              <div class="vehicle-card" data-type="BUS">
+                <div class="vehicle-icon">
+                  <img src="./bus.svg" alt="">
+                </div>
+                <div class="vehicle-name">Buses</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Highlights Section -->
+          <div class="highlights">
+            <h2 class="highlights-title">Highlights</h2>
+            <div class="highlight-item">
+              <div class="highlight-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-check-icon lucide-badge-check"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+              </div>
+              <div class="highlight-content">
+                <h3>Verified Sellers</h3>
+                <p>Find vehicles at best price from trusted dealers</p>
+              </div>
+            </div>
+            <div class="highlight-item">
+              <div class="highlight-icon">
+                <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+                  <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22S19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9S10.62 6.5 12 6.5 14.5 7.62 14.5 9 13.38 11.5 12 11.5Z"/>
+                </svg>
+              </div>
+              <div class="highlight-content">
+                <h3>Easy Searching</h3>
+                <p>Locate nearby vehicles instantly with smart filters</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+         <!-- New Brand Selection Step -->
+        <div id="brandSelection" class="step-content hidden">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fas fa-trademark"></i> Select Brand
+            </h2>
+            <div class="action-buttons">
+              <button class="btn btn-lg btn-back" id="backStep1Brand">
+                <i class="fas fa-arrow-left"></i> Back
+              </button>
+              <button class="btn btn-lg btn-search" id="nextStep2Brand">
+                Next <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="brandGrid" class="brand-grid">
+              <!-- Brands will be populated dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Range Selection -->
+        <div id="priceRange" class="step-content hidden">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fas fa-tags"></i> Price Range
+            </h2>
+            <div class="action-buttons">
+              <button class="btn btn-lg btn-back" id="backStep1">
+                <i class="fas fa-arrow-left"></i> Back
+              </button>
+              <button class="btn btn-lg btn-search" id="nextStep2">
+                Next <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="price-grid">
+              <div class="price-card" data-price="0-300000">
+                <img src="https://www.svgrepo.com/show/430865/coin.svg" alt="">
+                <div class="price-title">Below 3 lakhs</div>
+                <div class="price-range">Under ₹3,00,000</div>
+              </div>
+              
+              <div class="price-card" data-price="300001-500000">
+                <img src="https://www.svgrepo.com/show/430864/coin-2.svg" alt="">
+                <div class="price-title">3-5 lakhs</div>
+                <div class="price-range">₹3,00,001 - ₹5,00,000</div>
+              </div>
+              
+              <div class="price-card" data-price="500001-700000">
+                <img src="https://www.svgrepo.com/show/333841/coin-stack.svg" alt="">
+                <div class="price-title">5-7 lakhs</div>
+                <div class="price-range">₹5,00,001 - ₹7,00,000</div>
+              </div>
+              
+              <div class="price-card" data-price="700001-1000000">
+                <img src="https://www.svgrepo.com/show/521574/coins.svg" alt="">
+                <div class="price-title">7-10 lakhs</div>
+                <div class="price-range">₹7,00,001 - ₹10,00,000</div>
+              </div>
+              
+              <div class="price-card" data-price="1000001-ABOVE">
+                <img src="https://www.svgrepo.com/show/471231/coins-stacked-03.svg" alt="">
+                <div class="price-title">Above 10 lakhs</div>
+                <div class="price-range">₹10,00,001 and above</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Location Selection -->
+        <div id="location" class="step-content hidden">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fas fa-map-marker-alt"></i> Location
+            </h2>
+          </div>
+          <div class="card-body">
+            <div class="serchDiv">
+              <div class="location-search">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="locationInput" placeholder="Search City...">
+                <div class="suggestions-dropdown hidden" id="suggestionsDropdown"></div>
+              </div>
+              <a class="btn btn-lg btn-search search-button" id="searchVehicles" target="_blank">
+                <i class="fas fa-search"></i> 
+              </a>
+            </div>
+            <div class="popular-locations">
+              <div class="headLoc">
+                <h3 class="section-title">
+                  Popular Locations
+                </h3>
+              </div>
+              <!-- Locations Grid -->
+              <div class="locations-grid">
+                <!-- Location Cards -->
+                <div class="location-card" data-location="AHMEDABAD">
+                  <div class="location-icon">
+                    <img src="https://vj-prod-website-cms.s3.ap-southeast-1.amazonaws.com/depositphotos737713342xl-1738989179762.jpg" alt="Ahmedabad">
+                  </div>
+                  <div class="vehicle-name">Ahmedabad</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="JUNGADH">
+                  <div class="location-icon">
+                    <img src="https://www.gujarattourism.com/content/dam/gujrattourism/images/zone-wise-thumb-images/junagadh.jpg" alt="Junagadh">
+                  </div>
+                  <div class="vehicle-name">Junagadh</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="KUTCH">
+                  <div class="location-icon">
+                    <img src="https://s7ap1.scene7.com/is/image/incredibleindia/rann-of-kutch-kutch-gujarat-3-attr-hero?qlt=82&ts=1726733961119" alt="Kutch">
+                  </div>
+                  <div class="vehicle-name">Kutch</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="PATAN">
+                  <div class="location-icon">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCi9mMvGhWe4x24ilNDHBgRRTjYoE8J-gNsw&s" alt="Patan">
+                  </div>
+                  <div class="vehicle-name">Patan</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="RAJKOT">
+                  <div class="location-icon">
+                    <img src="https://travelsetu.com/apps/uploads/new_destinations_photos/destination/2023/12/20/3efd49f14521ec3ff0defff796a2e51e_1000x1000.jpg" alt="Rajkot">
+                  </div>
+                  <div class="vehicle-name">Rajkot</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="SURAT">
+                  <div class="location-icon">
+                    <img src="https://www.hotelscombined.in/rimg/dimg/a3/90/7cad2a07-city-49183-1695965da95.jpg?width=2160&height=1215&xhint=2253&yhint=1190&crop=true" alt="Surat">
+                  </div>
+                  <div class="vehicle-name">Surat</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="VADODARA">
+                  <div class="location-icon">
+                    <img src="https://www.holidify.com/images/bgImages/VADODARA.jpg" alt="Vadodara">
+                  </div>
+                  <div class="vehicle-name">Vadodara</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="GANDHINAGAR">
+                  <div class="location-icon">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/Akshardham_Gandhinagar_Gujarat.jpg" alt="Gandhinagar">
+                  </div>
+                  <div class="vehicle-name">Gandhinagar</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="JAMNAGAR">
+                  <div class="location-icon">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Lakhota_lake_Jamnagar%2C_Golden_hours.jpg" alt="Jamnagar">
+                  </div>
+                  <div class="vehicle-name">Jamnagar</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="BHAVNAGAR">
+                  <div class="location-icon">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a3/Shri_Swaminarayan_Mandir_gate.jpg" alt="Bhavnagar">
+                  </div>
+                  <div class="vehicle-name">Bhavnagar</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="ANAND">
+                  <div class="location-icon">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Amul_Plant_at_Anand.jpg" alt="Anand">
+                  </div>
+                  <div class="vehicle-name">Anand</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+                <div class="location-card" data-location="MEHSANA">
+                  <div class="location-icon">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/df/Rajmahal_Mehsana_Gujarat_India.jpg" alt="Mehsana">
+                  </div>
+                  <div class="vehicle-name">Mehsana</div>
+                  <div class="location-overlay">
+                    <div class="tick-mark">✓</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-lg btn-back" id="backStep2">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>&copy; 2025 Junigadi Vehicle Solution Pvt.Ltd. All rights reserved.</p>
+  </footer>
+  
+  <script>
+     // Brand data from your image
+    const vehicleBrands = {
+      TRUCK: ['Tata', 'Mahindra', 'SML Isuzu', 'Eicher', 'Ashok Leyland', 'Bharat Benz', 'MAN', 'Scania', 'AMW', 'Force'],
+      LOADING: ['Tata', 'Mahindra', 'Maruti Suzuki', 'Ashok Leyland', 'Atul Shakti', 'Piagio', 'Bajaj', 'Isuzu', 'Force', 'Toyota'],
+      CAR: ['Tata', 'Mahindra', 'Maruti Suzuki', 'Hyundai', 'Renault', 'Kia', 'Nissan', 'Ford', 'Toyota', 'Chevrolet', 'Skoda', 'MG', 'Honda', 'Datsun', 'Volkswagen', 'Isuzu', 'Force', 'Jeep', 'Mercedes'],
+      TAXI: ['Tata', 'Mahindra', 'Maruti Suzuki', 'Hyundai', 'Toyota', 'Honda'],
+      AGRI: ['EICHER', 'Sonalika', 'Mahindra', 'John Deere', 'Swaraj', 'Massey Ferguson', 'FORCE'],
+      CONST: ['JCB', 'Volvo', 'Hitachi', 'John Deere', 'CASE'],
+      BUS: ['Volvo', 'Bharat Benz', 'Tata', 'Scania', 'Ashok Leyland', 'Mahindra', 'Eicher', 'SML Isuzu', 'MAN', 'FORCE']
+    };
+
+    // Map your vehicle types to the brand categories
+    const vehicleTypeToBrandCategory = {
+      TRUCK: 'TRUCK',
+      LOADING: 'LOADING',
+      CAR: 'CAR',
+      TAXI: 'TAXI',
+      TRACTOR: 'AGRI',
+      JCB: 'CONST',
+      BUS: 'BUS'
+    };
+
+    // DOM Elements
+    const vehicleCards = document.querySelectorAll('.vehicle-card');
+    const priceCards = document.querySelectorAll('.price-card');
+    const locationCards = document.querySelectorAll('.location-card');
+    const progressLineFill = document.getElementById('progressLineFill');
+    const progressInfo = document.getElementById('progressInfo');
+    const steps = document.querySelectorAll('.step-content');
+    const stepItems = document.querySelectorAll('.step-item');
+    const nextStep1 = document.getElementById('nextStep1');
+    const nextStep2 = document.getElementById('nextStep2');
+    const backStep1 = document.getElementById('backStep1');
+    const backStep2 = document.getElementById('backStep2');
+    
+    const searchButton = document.getElementById('searchVehicles');
+    const locationInput = document.getElementById('locationInput');
+    const suggestionsDropdown = document.getElementById('suggestionsDropdown');
+    const welcomeBack = document.getElementById('welcomeBack');
+    const lastLocation = document.getElementById('lastLocation');
+    const resetBtn = document.getElementById('resetBtn');
+    const brandSelection = document.getElementById('brandSelection');
+    const brandGrid = document.getElementById('brandGrid');
+    const nextStep2Brand = document.getElementById('nextStep2Brand');
+    const backStep1Brand = document.getElementById('backStep1Brand');
+    
+    // State
+    let currentStep = 1;
+    let selectedVehicle = null;
+    let selectedPrice = null;
+    let selectedLocation = null;
+    let selectedBrand = null;
+
+    // Location suggestions
+    const moreLocations = [
+      'ADIPUR', 'AHMEDABAD', 'AHEMDABAD', 'AJMER', 'AMRELI', 'ANAND', 'ANJAR',
+      'ANKLESHWAR', 'ARAVALLI', 'BABRA', 'BAGASRA', 'BAGASARA', 'BALASINOR',
+      'BARMER', 'BHAVNAGAR', 'BHARUCH', 'BHILWARA', 'BHUJ', 'BOTAD',
+      'CHADOTAR', 'CHHAPI', 'CHOTILA', 'DEESA', 'DEVBHOOMI DWARKA',
+      'DHAGANDHARA', 'DHANERA', 'DHARAMPUR', 'DHORAJI', 'DIYODAR',
+      'FARRUKHABAD', 'GANDHIDHAM', 'GANDHINAGAR', 'GODHRA', 'GONDAL', 'HIMATNAGAR',
+      'JAMNAGAR', 'JUNAGADH', 'KADI', 'KALOL', 'KHAMBHAT', 'KHEDA', 'KUTCH',
+      'MAHESANA', 'MEHSANA', 'MODASA', 'MORBI', 'NADIAD', 'NAVSARI', 'PALANPUR',
+      'PATAN', 'PORBANDAR', 'RAJKOT', 'SABARKANTHA', 'SURAT', 'SURENDRANAGAR',
+      'UNA', 'VADODARA', 'VALSAD', 'VAPI', 'VERAVAL', 'VYARA'
+    ];
+    
+    // Initialize
+    function init() {
+      setupEventListeners();
+      checkForReturningUser();
+      updateProgress(currentStep);
+    }
+    
+    // Check if user is returning and show last location
+    function checkForReturningUser() {
+      const lastSearch = localStorage.getItem('lastVehicleSearch');
+      
+      if (lastSearch) {
+        const { location, vehicle, timestamp } = JSON.parse(lastSearch);
+        const now = new Date().getTime();
+        const oneDay = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        
+        // Only show welcome if it's within 24 hours
+        if (now - timestamp < oneDay) {
+          if (location) {
+            welcomeBack.classList.remove('hidden');
+            lastLocation.textContent = location;
+          } else {
+            const lastVehicle = localStorage.getItem('lastVehicleType');
+            if (lastVehicle) {
+              document.getElementById('welcomeBackVehicle').classList.remove('hidden');
+              document.getElementById('lastType').textContent = lastVehicle;
+            }
+          }
+        }
+      }
+    }
+    
+    // Save last search to localStorage
+    function saveLastSearch(location, vehicle) {
+ const searchData = {
+        location,
+        vehicle: vehicle,
+        timestamp: new Date().getTime()
+      };
+      localStorage.setItem('lastVehicleSearch', JSON.stringify(searchData));
+    }
+    
+    function saveLastVehicle(vehicle) {
+      localStorage.setItem('lastVehicleType', vehicle);
+    }
+    
+    // Reset all selections
+    function resetAll() {
+      // Reset selections
+      selectedVehicle = null;
+      selectedBrand = null;
+      selectedPrice = null;
+      selectedLocation = null;
+      
+      // Reset UI
+      vehicleCards.forEach(c => c.classList.remove('selected'));
+      priceCards.forEach(c => c.classList.remove('selected'));
+      locationCards.forEach(c => c.classList.remove('selected'));
+      locationInput.value = '';
+      
+      // Reset step
+      currentStep = 1;
+      showStep(0);
+      updateProgress(currentStep);
+      
+      // Hide welcome back message
+      welcomeBack.classList.add('hidden');
+      
+      // Clear localStorage
+      localStorage.removeItem('lastVehicleSearch');
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+      // Vehicle selection
+      vehicleCards.forEach(card => {
+        card.addEventListener('click', () => {
+          vehicleCards.forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedVehicle = card.getAttribute('data-type');
+        });
+      });
+      
+      // Price selection
+      priceCards.forEach(card => {
+        card.addEventListener('click', () => {
+          priceCards.forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedPrice = card.getAttribute('data-price');
+        });
+      });
+      
+      // Location selection
+      locationCards.forEach(card => {
+        card.addEventListener('click', () => {
+          // Remove selection from all cards
+          locationCards.forEach(c => c.classList.remove('selected'));
+          
+          // Add selection to clicked card
+          card.classList.add('selected');
+          selectedLocation = card.getAttribute('data-location');
+          
+          // Set input value to selected location
+          locationInput.value = selectedLocation;
+        });
+      });
+      
+      // Navigation
+      nextStep1.addEventListener('click', () => {
+        if (!selectedVehicle) {
+          alert('Please select a vehicle type');
+          return;
+        }
+        // Render brands based on selected vehicle
+        renderBrands(selectedVehicle);
+        
+        currentStep = 2;
+        showStep(1);
+        updateProgress(currentStep);
+      });
+       // Navigation from brand selection
+      nextStep2Brand.addEventListener('click', () => {
+        currentStep = 3;
+        showStep(2);
+        updateProgress(currentStep);
+      });
+      
+ 
+      
+      nextStep2.addEventListener('click', () => {
+        if (!selectedPrice) {
+          alert('Please select a price range');
+          return;
+        }
+        currentStep = 4;
+        showStep(3);
+        updateProgress(currentStep);
+      });
+
+      backStep1Brand.addEventListener('click', () => {
+        currentStep = 1;
+        showStep(0);
+        updateProgress(currentStep);
+      });
+
+      backStep1.addEventListener('click', () => {
+        currentStep = 2;
+        showStep(1);
+        updateProgress(currentStep);
+      });
+      
+      backStep2.addEventListener('click', () => {
+        currentStep = 3;
+        showStep(2);
+        updateProgress(currentStep);
+      });
+      
+      
+      // Render brands based on vehicle type
+    function renderBrands(vehicleType) {
+      brandGrid.innerHTML = '';
+      const brandCategory = vehicleTypeToBrandCategory[vehicleType];
+      const brands = vehicleBrands[brandCategory] || [];
+      
+      brands.forEach(brand => {
+        const brandCard = document.createElement('div');
+        brandCard.className = 'brand-card';
+        brandCard.setAttribute('data-brand', brand);
+        brandCard.innerHTML = `
+          <div class="brand-name">${brand}</div>
+        `;
+        
+        brandCard.addEventListener('click', () => {
+          document.querySelectorAll('.brand-card').forEach(c => {
+            c.classList.remove('selected');
+          });
+          brandCard.classList.add('selected');
+          selectedBrand = brand;
+        });
+        
+        brandGrid.appendChild(brandCard);
+      });
+    }
+      // Search button
+      searchButton.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent default link behavior
+        
+        // Get location value - use input if location card isn't selected
+        let locationValue = selectedLocation || locationInput.value.trim();
+        
+        // Save the last search location
+        saveLastSearch(locationValue, selectedVehicle);
+        saveLastVehicle(selectedVehicle);
+        
+        const code = getCode(selectedVehicle, selectedPrice);
+        let url = `https://mydukaan.io/junigadi/search?query=${code}`;
+        if (locationValue) {
+          url += ` ${locationValue}`;
+        }
+        if (selectedBrand) {
+          url += ` ${selectedBrand}`;
+        }
+        
+        // Open in new tab
+        window.open(url, '_blank');
+      });
+      
+      // Location input with suggestions
+      locationInput.addEventListener('input', function() {
+        const value = this.value.toUpperCase();
+        
+        // Deselect any selected location card when typing
+        if (value && selectedLocation) {
+          locationCards.forEach(card => {
+            if (card.classList.contains('selected')) {
+              card.classList.remove('selected');
+              card.classList.add('deselected');
+              setTimeout(() => {
+                card.classList.remove('deselected');
+              }, 500);
+            }
+          });
+          selectedLocation = null;
+        }
+        
+        const filteredLocations = moreLocations.filter(loc => 
+          loc.toUpperCase().includes(value)
+        );
+        
+        suggestionsDropdown.innerHTML = '';
+        
+        if (filteredLocations.length === 0 || value === '') {
+          suggestionsDropdown.classList.add('hidden');
+          return;
+        }
+        
+        filteredLocations.forEach(loc => {
+          const div = document.createElement('div');
+          div.className = 'suggestion-item';
+          div.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${loc}`;
+          div.addEventListener('click', () => {
+            locationInput.value = loc;
+            suggestionsDropdown.classList.add('hidden');
+            selectedLocation = loc;
+          });
+          suggestionsDropdown.appendChild(div);
+        });
+        
+        suggestionsDropdown.classList.remove('hidden');
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!locationInput.contains(e.target) && !suggestionsDropdown.contains(e.target)) {
+          suggestionsDropdown.classList.add('hidden');
+        }
+      });
+      
+      // Reset button
+      resetBtn.addEventListener('click', () => {
+        resetAll();
+      });
+    }
+    
+    // Show specific step
+    function showStep(stepIndex) {
+      steps.forEach((step, index) => {
+        step.classList.toggle('hidden', index !== stepIndex);
+      });
+    }
+    
+    // Update progress bar
+    function updateProgress(step) {
+      // Calculate progress percentage
+      const progressPercent = (step - 1) * (100 / 3);
+      progressLineFill.style.width = `${progressPercent}%`;
+      
+      // Update step text
+      const stepTexts = {
+        1: "Step 1 of 4 - Select Vehicle Type",
+        2: "Step 2 of 4 - Choose Brand",
+        3: "Step 3 of 4 - Choose Price Range",
+        4: "Step 4 of 4 - Select Location"
+      };
+      progressInfo.textContent = stepTexts[step];
+      
+      // Update step indicators
+      stepItems.forEach((item, index) => {
+        const stepNumber = index + 1;
+        const circle = item.querySelector('.step-circle');
+        
+        // Reset classes
+        item.classList.remove('active', 'completed');
+        circle.classList.remove('active', 'completed');
+        
+        if (stepNumber < step) {
+          // Completed step
+          item.classList.add('completed');
+          circle.classList.add('completed');
+        } else if (stepNumber === step) {
+          // Current step
+          item.classList.add('active');
+          circle.classList.add('active');
+        }
+      });
+    }
+    
+    // Get code based on vehicle and price
+    function getCode(vehicle, price) {
+      const codes = {
+        "CAR": {
+          "0-300000": "876WZ",
+          "300001-500000": "B9XK4",
+          "500001-700000": "D3N7Q",
+          "700001-1000000": "FJ2M5",
+          "1000001-ABOVE": "H1VY8"
+        },
+        "LOADING": {
+          "0-300000": "T8F5D",
+          "300001-500000": "P2Z3B",
+          "500001-700000": "S4X9J",
+          "700001-1000000": "O5X69",
+          "1000001-ABOVE": "V1N3H"
+        },
+        "TRUCK": {
+          "0-300000": "W6G7K",
+          "300001-500000": "X5M2P",
+          "500001-700000": "Y3L9Q",
+          "700001-1000000": "Z4T8V",
+          "1000001-ABOVE": "6D7B1"
+        },
+        "TAXI": {
+          "0-300000": "9K2H3",
+          "300001-500000": "M5J2S",
+          "500001-700000": "G8R4L",
+          "700001-1000000": "C1Y9W",
+          "1000001-ABOVE": "Q7P62"
+        },
+        "TRACTOR": {
+          "0-300000": "A7K3Z",
+          "300001-500000": "Q9L8M",
+          "500001-700000": "X2V4T",
+          "700001-1000000": "R5N1Y",
+          "1000001-ABOVE": "B6W9C"
+        },
+        "JCB": {
+          "0-300000": "J3D7H",
+          "300001-500000": "P8F2E",
+          "500001-700000": "M1T6Q",
+          "700001-1000000": "Z4G9A",
+          "1000001-ABOVE": "C7L5X"
+        },
+        "BUS": {
+          "0-300000": "T6B9R",
+          "300001-500000": "L3X7P",
+          "500001-700000": "D8M2Y",
+          "700001-1000000": "H1Q4Z",
+          "1000001-ABOVE": "V9C5N"
+        }
+      };
+      
+      return codes[vehicle]?.[price] || "DEFAULT";
+    }
+    
+    // Initialize the app
+    init();
+  </script>
+</body>
+</html>
